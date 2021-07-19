@@ -2,9 +2,8 @@ library(tidyverse)
 library(lubridate)
 
 get_vaccines <- function(){
-  
-  setwd("C:/Users/jpueyo/OneDrive - ICRA/Other projects/sarsaigua/analysis_sarsaigua")
-  source("functions.R")
+  path <- dirname(rstudioapi::getSourceEditorContext()$path)
+  source(paste(path,"functions.R", sep="/"))
   
   download <- download.file("https://dadescovid.cat/static/csv/catalunya_setmanal.zip",
                             destfile = "vacunacio.zip")

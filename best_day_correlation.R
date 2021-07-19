@@ -4,10 +4,9 @@ library(grid)
 library(gridExtra)
 library(RColorBrewer)
 
-setwd("C:/Users/jpueyo/OneDrive - ICRA/Other projects/sarsaigua/")
-
-#load functions for data collection and curation
-source('analysis_sarsaigua/functions.R')
+path <- dirname(rstudioapi::getSourceEditorContext()$path)
+source(paste(path,"functions.R", sep="/"))
+setwd(path)
 
 data <- load_excel(remove_first = F)
 

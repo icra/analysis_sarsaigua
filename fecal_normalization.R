@@ -1,7 +1,8 @@
 library(tidyverse)
 library(patchwork)
 library(lubridate)
-setwd("C:/Users/jpueyo/OneDrive - ICRA/Other projects/sarsaigua/")
+
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 #load and curate data
 data <- read.csv2("data/fecal_normalization_2.csv")

@@ -1,9 +1,11 @@
 library(tidyverse)
 
-setwd("C:/Users/jpueyo/OneDrive - ICRA/Other projects/sarsaigua/")
+#load functions
+path <- dirname(rstudioapi::getSourceEditorContext()$path)
+source(paste(path,"functions.R", sep="/"))
+setwd(path)
 
-#load functions for data collection and curation
-source('analysis_sarsaigua/functions.R')
+#load data
 data <- load_excel(remove_first = F)
 
 theme_set(theme_classic())

@@ -6,11 +6,10 @@ library(patchwork)
 library(RColorBrewer)
 library(emojifont)
 
-setwd("C:/Users/jpueyo/OneDrive - ICRA/Other projects/sarsaigua/")
-
-#load functions for data collection and curation
-source('analysis_sarsaigua/functions.R')
-source('analysis_sarsaigua//vaccine_curation.R')
+path <- dirname(rstudioapi::getSourceEditorContext()$path)
+source(paste(path,"functions.R", sep="/"))
+source(paste(path,"vaccine_curation.R", sep="/"))
+setwd(path)
 
 #load data on vaccine doses
 vaccines <- get_vaccines()

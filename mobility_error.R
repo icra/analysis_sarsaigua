@@ -1,7 +1,9 @@
 library(tidyverse)
 library(emojifont)
-setwd("C:/Users/jpueyo/OneDrive - ICRA/Other projects/sarsaigua/data/mobility")
-source("../../scripts/functions.R")
+
+path <- dirname(rstudioapi::getSourceEditorContext()$path)
+source(paste(path,"functions.R", sep="/"))
+setwd(path)
 
 mobility <- read.csv2("mobi_edar.csv")
 

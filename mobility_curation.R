@@ -2,9 +2,10 @@ library(tidyverse)
 library(R.utils)
 library(RCurl)
 library(lubridate)
-source("../../scripts/functions.R")
 
-setwd("C:/Users/jpueyo/OneDrive - ICRA/Other projects/sarsaigua/data/mobility")
+path <- dirname(rstudioapi::getSourceEditorContext()$path)
+source(paste(path,"functions.R", sep="/"))
+setwd(path)
 
 #set years and days
 years <- c(2020, 2021)
