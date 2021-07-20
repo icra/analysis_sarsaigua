@@ -6,7 +6,9 @@ conflict_prefer("filter", "dplyr")
 
 ##LOAD EXCEL
 
-load_excel <- function(filename = "Mostres_newest.csv", folder="C:/Users/jpueyo/OneDrive - ICRA/Other projects/sarsaigua", remove_first = FALSE){
+load_excel <- function(filename = "Mostres_newest.csv", 
+                       folder=paste(dirname(rstudioapi::getSourceEditorContext()$path), "data", sep="/"), 
+                       remove_first = FALSE){
   data <- read.csv2(paste(folder,filename, sep="/"), dec = '.', na.strings=c("","NA"))
   
   #remove samples without data
@@ -129,4 +131,20 @@ all_targets_data <- function(data=data, filter_value = 0){
   colnames(casos)[2:5] <- c("darrers_14", "darrers_7", "set_i_set", "mitjana_7")
   
   return(casos)
+}
+
+#create slope
+create_slope <- function(data, variable, n_casos, direction = -1){
+  y <- c()
+  for (j in 0:n_casos){
+    if ((i-j)>0){
+      y <- c(casos_edar[i+(j*direction), variable], y)        
+    }
+    
+  }
+  while (length(y) < (n_casos+1)){
+    y <- c(y, NA)
+  }
+  x <- 1:(length(y))
+  return(lm(y ~ x)$coefficients[2])
 }
