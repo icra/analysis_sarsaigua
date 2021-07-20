@@ -5,7 +5,7 @@ path <- dirname(rstudioapi::getSourceEditorContext()$path)
 source(paste(path,"functions.R", sep="/"))
 setwd(path)
 
-mobility <- read.csv2("mobi_edar.csv")
+mobility <- read.csv2("data/mobi_edar.csv")
 
 N1_data <- load_excel() %>% 
   target_data(diana="N1")
