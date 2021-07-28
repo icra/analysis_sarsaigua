@@ -35,10 +35,10 @@ beta2 <- 5:1
 
 for (i in 1:5){
   for (j in 1:nrow(N1_casos)){
-    result <- replicate(1000, sim1(load = N1_casos$load_N1[j], beta1 = 6, beta2 = 1))
+    result <- replicate(1000, sim1(load = N1_casos$load_N1[j], beta1 = beta1[i], beta2 = beta2[i]))
     sim_median <- median(result)
-    #field <- paste("sim_median",beta1[i], beta2[i], sep="_")
-    N1_casos[j,"sim_fix_10_7"] <- sim_median
+    field <- paste("sim_median",beta1[i], beta2[i], sep="_")
+    N1_casos[j,field] <- sim_median
     print(c(i,j))
   }
 }
