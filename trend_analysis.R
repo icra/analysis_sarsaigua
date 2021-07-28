@@ -1,6 +1,7 @@
 library(tidyverse)
 library(lubridate)
 library(viridis)
+library(patchwork)
 
 path <- dirname(rstudioapi::getSourceEditorContext()$path)
 source(paste(path,"functions.R", sep="/"))
@@ -44,35 +45,28 @@ for (edar in levels(N1_casos$EDAR)){
 cor.test(N1_casos$slope_log_7, N1_casos$slope_log_N1, method="pearson")
 
 #scatterplot with slopes
-N1_casos %>% 
+p0 <- N1_casos %>% 
   filter(!is.na(slope_log_7), !is.na(slope_log_N1)) %>% 
-  ggplot(aes(slope_log_7, slope_log_N1, color=log_N1))+geom_point()+geom_smooth()
-  scale_color_viridis()
-
-#example of data for one EDAR
-N1_casos %>% 
-  filter(EDAR == "DGIR") %>% 
-  arrange(Data.mostreig) %>% 
-  ggplot(aes(Data.mostreig, log_N1, fill=slope_log_N1))+geom_col()+
-  scale_fill_viridis(direction = -1)
-
-
+  ggplot(aes(slope_log_7, slope_log_N1, color=log_N1))+
+  geom_point()+
+  geom_smooth()+
+  theme(legend.position = 'none')
 
 
 ##ANALYSING PREDICTION POWER OF N1
 forward <- 1
 
-N1_casos$log_7_forward <- NA
+N1_casos$slope_log_7_forward <- NA
 
 for (i in 1:nrow(N1_casos)){
-  N1_casos$log_7_forward[i] <- N1_casos$log_7[i+forward]
+  N1_casos$slope_log_7_forward[i] <- N1_casos$slope_log_7[i+forward]
 }
 
-cor.test(N1_casos$log_7_forward, N1_casos$log_N1, method="pearson")
+cor.test(N1_casos$slope_log_7_forward, N1_casos$slope_log_N1, method="pearson")
 
-N1_casos %>% 
-  filter(!is.na(log_7_forward), !is.na(log_N1)) %>%
-  ggplot(aes(log_7_forward, log_N1))+geom_point()+geom_smooth()
+p1 <- N1_casos %>% 
+  filter(!is.na(slope_log_7_forward), !is.na(slope_log_N1)) %>%
+  ggplot(aes(slope_log_7_forward, slope_log_N1, color=log_N1))+geom_point()+geom_smooth()
 
-
+p0 + p1
 

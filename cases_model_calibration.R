@@ -32,13 +32,15 @@ interval_ = function(x) c(quantile(x, 0.025),
 beta1 <- 1:5
 beta2 <- 5:1  
 
+#for replication
+set.seed(1234)
 
 for (i in 1:5){
   for (j in 1:nrow(N1_casos)){
-    result <- replicate(1000, sim1(load = N1_casos$load_N1[j], beta1 = 6, beta2 = 1))
+    result <- replicate(1000, sim1(load = N1_casos$load_N1[j], beta1 = beta1[i], beta2 = beta2[i]))
     sim_median <- median(result)
-    #field <- paste("sim_median",beta1[i], beta2[i], sep="_")
-    N1_casos[j,"sim_fix_10_7"] <- sim_median
+    field <- paste("sim_median",beta1[i], beta2[i], sep="_")
+    N1_casos[j,field] <- sim_median
     print(c(i,j))
   }
 }
@@ -60,14 +62,16 @@ cols <- c(
   "N1" = 'black'
           )
 
+alpha_value <- 1
+
 ggplot(N1_casos, aes(x=Data.mostreig))+
-  geom_line(aes(y=sim_median_1_5+1, group=EDAR, color="sim_median_1_5", alpha=0.1))+
-  geom_line(aes(y=sim_median_2_4+1, group=EDAR, color="sim_median_2_4", alpha=0.1))+
-  geom_line(aes(y=sim_median_3_3+1, group=EDAR, color="sim_median_3_3", alpha=0.1))+
-  geom_line(aes(y=sim_median_4_2+1, group=EDAR, color="sim_median_4_2"))+
-  geom_line(aes(y=sim_median_5_1+1, group=EDAR, color="sim_median_5_1", alpha=0.1))+
-  geom_line(aes(y=darrers_7+1, group=EDAR, color="darrers_7", alpha=0.1))+
-  geom_line(aes(y=load_N1, group=EDAR, color="N1"))+
+  geom_line(aes(y=sim_median_1_5+1, group=EDAR, color="sim_median_1_5"), alpha=alpha_value)+
+  geom_line(aes(y=sim_median_2_4+1, group=EDAR, color="sim_median_2_4"), alpha=alpha_value)+
+  geom_line(aes(y=sim_median_3_3+1, group=EDAR, color="sim_median_3_3"), alpha=alpha_value)+
+  geom_line(aes(y=sim_median_4_2+1, group=EDAR, color="sim_median_4_2"), alpha=alpha_value)+
+  geom_line(aes(y=sim_median_5_1+1, group=EDAR, color="sim_median_5_1"), alpha=alpha_value)+
+  geom_line(aes(y=darrers_7+1, group=EDAR, color="darrers_7"), alpha=alpha_value)+
+  geom_line(aes(y=load_N1, group=EDAR, color="N1"), alpha=alpha_value)+
   scale_color_manual(name="", values=cols)+
   theme(axis.text.x = element_text(angle=90, vjust=0.5),
         legend.title = element_blank())+
@@ -75,8 +79,8 @@ ggplot(N1_casos, aes(x=Data.mostreig))+
 
 cor.test(N1_casos$log_7,log10(N1_casos$sim_median_5_1))
 
-ggplot(N1_casos, aes(load_N1, sim_median_4_2, color=log_N1))+
-  geom_point()+
+ggplot(N1_casos, aes(load_N1, sim_median_5_1))+
+  geom_point(color='red')+
   geom_smooth()+
   scale_color_viridis()
 

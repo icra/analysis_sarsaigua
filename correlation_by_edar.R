@@ -87,7 +87,10 @@ for (i in 1:nrow(wwtp)){
 
 wwtp$highest <- factor(wwtp$highest)
 highest <- summary(wwtp$highest)
-highest <- paste("Highest target N1: ",highest[2],"; N2: ", highest[3],"; IP4: ", highest[1], sep="")
+highest <- paste(
+  "Highest target N1: ", round(highest[[2]]/sum(!is.na(wwtp$N1))*100,2),
+  "%; N2: ", round(highest[[3]]/sum(!is.na(wwtp$N2))*100,2),
+  "%; IP4: ", round(highest[[1]]/sum(!is.na(wwtp$IP4))*100,2), "%",sep="")
 
 plot_data <- wwtp %>% 
   select(EDAR, N1, N2, IP4) %>% 
@@ -106,14 +109,12 @@ for (i in 1:nrow(plot_data)){
   plot_data$inh[i] <- as.numeric(plot_data$inh[i])
 }
 
-text_size <- 30
-
 ggplot(plot_data, aes(reorder(EDAR, -inh), value, fill=target))+
   geom_col(position = position_dodge(width = 0.9))+
-  theme(axis.text.x = element_text(angle=90, vjust=0.5, hjust=1, size=text_size+0.5))+
+  theme(axis.text.x = element_text(angle=90, vjust=0.5, hjust=1))+
   labs(x="Correlation between GC and accum. 7 past days", y="R value")+
-  annotate("text", x=28, y=-0.05, label=highest, size = text_size/3)+
-  theme(text = element_text(size=text_size))
+  annotate("text", x=28, y=-0.05, label=highest)+
+  #theme(text = element_text(size=text_size))
 ggsave("Fig6A.png", width = 20, units = "cm")
 
 ggplot(plot_data, aes(target, value, fill = target))+
