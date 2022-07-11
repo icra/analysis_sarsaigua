@@ -37,8 +37,20 @@ load_excel <- function(filename = "Mostres_newest.csv",
   }
   
   #string to numeric replacing commas by points
-  data$Cabal.influent.últimes.24h.calculat <- as.numeric(gsub(",",".",data$Cabal.influent.últimes.24h.calculat))
-  data$Cabal.influent.últimes.24h.calculat[data$Cabal.influent.últimes.24h.calculat == 0] <- NA
+  data$Cabal.influent.Ãºltimes.24h.calculat <- as.numeric(gsub(",",".",data$Cabal.influent.Ãºltimes.24h.calculat))
+  data$Cabal.influent.Ãºltimes.24h.calculat[data$Cabal.influent.Ãºltimes.24h.calculat == 0] <- NA
+  
+  #repair labs names
+  data <- data %>% 
+    mutate(Laboratori = case_when(
+      str_starts(Laboratori, "UB") ~ "UB_Girones",
+      str_starts(Laboratori, "EURE") ~ "Eurecat",
+      str_starts(Laboratori, "Virus") ~ "Virus Enterics-UB",
+      TRUE ~ "Some lab is wrong"
+    ))
+  
+  #check labs names and stop if some are not right
+  stopifnot(all(data$Laboratori != "Some lab is wrong"))
   
   #convert labs to factor
   data$Laboratori <- factor(data$Laboratori)
@@ -53,36 +65,41 @@ load_excel <- function(filename = "Mostres_newest.csv",
 ## CREATE DATAFRAME WITH A SPECIFIC TARGET
 
 target_data <- function(data=data, diana = 'N1', filter_value = 0){
-  conc_diana <- paste(diana,".Concentracio.final", sep="")
+  conc_diana <- paste0(diana,".Concentracio.final")
+  spline_diana <- paste0(diana, ".spline")
   
   casos <- data %>%
     #select useful variables
     select(Data.mostreig,
-           Nº.casos.darrers.14.dies..acum., 
-           Nº.casos.darrers.7.dies..acum., 
-           Nº.casos.darrers.7.dies.i.següents.7.dies,
+           NÂº.casos.darrers.14.dies..acum., 
+           NÂº.casos.darrers.7.dies..acum., 
+           NÂº.casos.darrers.7.dies.i.segÃ¼ents.7.dies,
            Mitjana.darrers.7.dies..promig.,
            matches(conc_diana),
-           Cabal.influent.últimes.24h.calculat,
+           Cabal.influent.Ãºltimes.24h.calculat,
            EDAR,
            EDAR.provincia,
-           Nº.habitants.municipis.assistits.EDAR,
-           Laboratori) %>% 
+           NÂº.habitants.municipis.assistits.EDAR,
+           Laboratori,
+           matches(spline_diana)
+           ) %>% 
     
     #remove target concentrations lower than filter value
     filter(.[[6]] > filter_value,
-           !is.nan(Cabal.influent.últimes.24h.calculat)) %>%
+           !is.nan(Cabal.influent.Ãºltimes.24h.calculat)) %>%
     
     #calculate viral load and log10
-    mutate(load = .[[6]] * 1000 * Cabal.influent.últimes.24h.calculat,
-           log_14 = log10(Nº.casos.darrers.14.dies..acum.+1), 
-           log_7 = log10(Nº.casos.darrers.7.dies..acum.+1), 
-           log_7_7 = log10(Nº.casos.darrers.7.dies.i.següents.7.dies+1),
+    mutate(load = .[[6]] * 1000 * Cabal.influent.Ãºltimes.24h.calculat,
+           log_14 = log10(NÂº.casos.darrers.14.dies..acum.+1), 
+           log_7 = log10(NÂº.casos.darrers.7.dies..acum.+1), 
+           log_7_7 = log10(NÂº.casos.darrers.7.dies.i.segÃ¼ents.7.dies+1),
            log_mean_7 = log10(Mitjana.darrers.7.dies..promig.+1),
            log = log10(load),
-           load_inh = load / Nº.habitants.municipis.assistits.EDAR * 10^5,
-           darrers_7_inh = Nº.casos.darrers.7.dies..acum. / Nº.habitants.municipis.assistits.EDAR * 10^5
-           )
+           load_inh = load / NÂº.habitants.municipis.assistits.EDAR * 10^5,
+           darrers_7_inh = NÂº.casos.darrers.7.dies..acum. / NÂº.habitants.municipis.assistits.EDAR * 10^5,
+           log_spline = log10(!!sym(spline_diana))
+           ) %>% 
+    mutate(log_spline = if_else(is.nan(log_spline), log, log_spline))
   
   #rename variables
   colnames(casos)[2:5] <- c("darrers_14", "darrers_7", "set_i_set", "mitjana_7")
@@ -96,19 +113,19 @@ all_targets_data <- function(data=data, filter_value = 0){
   casos <- data %>% 
     #select useful variables
     select(Data.mostreig,
-           Nº.casos.darrers.14.dies..acum., 
-           Nº.casos.darrers.7.dies..acum., 
-           Nº.casos.darrers.7.dies.i.següents.7.dies,
+           NÂº.casos.darrers.14.dies..acum., 
+           NÂº.casos.darrers.7.dies..acum., 
+           NÂº.casos.darrers.7.dies.i.seg?ents.7.dies,
            Mitjana.darrers.7.dies..promig.,
            N1.Concentracio.final,
            N2.Concentracio.final,
            IP4.Concentracio.final,
-           Cabal.influent.últimes.24h.calculat,
+           Cabal.influent.Ãºltimes.24h.calculat,
            Laboratori,
            EDAR) %>% 
     
     #remove samples without water flow volume
-    filter(!is.nan(Cabal.influent.últimes.24h.calculat)) %>%
+    filter(!is.nan(Cabal.influent.Ãºltimes.24h.calculat)) %>%
     
     #convert to NA concentrations lower than filter_value
     mutate(N1.Concentracio.final = ifelse(N1.Concentracio.final < filter_value, NA, N1.Concentracio.final),
@@ -116,12 +133,12 @@ all_targets_data <- function(data=data, filter_value = 0){
            IP4.Concentracio.final = ifelse(IP4.Concentracio.final < filter_value, NA, IP4.Concentracio.final),
            
            #calculate viral load and logs
-           load_N1 = N1.Concentracio.final * 1000 * Cabal.influent.últimes.24h.calculat,
-           load_N2 = N2.Concentracio.final * 1000 * Cabal.influent.últimes.24h.calculat,
-           load_IP4 = IP4.Concentracio.final * 1000 * Cabal.influent.últimes.24h.calculat,
-           log_14 = log10(Nº.casos.darrers.14.dies..acum.+1), 
-           log_7 = log10(Nº.casos.darrers.7.dies..acum.+1), 
-           log_7_7 = log10(Nº.casos.darrers.7.dies.i.següents.7.dies+1),
+           load_N1 = N1.Concentracio.final * 1000 * Cabal.influent.Ãºltimes.24h.calculat,
+           load_N2 = N2.Concentracio.final * 1000 * Cabal.influent.Ãºltimes.24h.calculat,
+           load_IP4 = IP4.Concentracio.final * 1000 * Cabal.influent.Ãºltimes.24h.calculat,
+           log_14 = log10(NÂº.casos.darrers.14.dies..acum.+1), 
+           log_7 = log10(NÂº.casos.darrers.7.dies..acum.+1), 
+           log_7_7 = log10(NÂº.casos.darrers.7.dies.i.seg?ents.7.dies+1),
            log_mean_7 = log10(Mitjana.darrers.7.dies..promig.+1),
            log_N1 = log10(load_N1),
            log_N2 = log10(load_N2),
