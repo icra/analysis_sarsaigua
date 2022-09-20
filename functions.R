@@ -4,6 +4,11 @@ library(conflicted)
 conflict_prefer("select", "dplyr")
 conflict_prefer("filter", "dplyr")
 
+## String with decimal comma to numeric
+comma_to_numeric <- function(X){
+  as.numeric(gsub(",",".", X))
+}
+
 ##LOAD EXCEL
 
 load_excel <- function(filename = "Mostres_newest.csv", 
@@ -37,7 +42,9 @@ load_excel <- function(filename = "Mostres_newest.csv",
   }
   
   #string to numeric replacing commas by points
-  data$Cabal.influent.últimes.24h.calculat <- as.numeric(gsub(",",".",data$Cabal.influent.últimes.24h.calculat))
+  data <- mutate(data, across(contains("casos"), .fns = ~ comma_to_numeric(.x)))
+  
+  data$Cabal.influent.últimes.24h.calculat <- comma_to_numeric(data$Cabal.influent.últimes.24h.calculat)
   data$Cabal.influent.últimes.24h.calculat[data$Cabal.influent.últimes.24h.calculat == 0] <- NA
   
   #repair labs names
